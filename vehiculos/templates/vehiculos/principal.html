@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Vehículos - Panel Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+            animation: floatingParticles 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes floatingParticles {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
+            to { text-shadow: 0 2px 20px rgba(102, 126, 234, 0.5); }
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) rotateX(5deg);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px) rotateX(5deg);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        .btn-info:hover {
+            transform: translateY(-3px) rotateX(5deg);
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-3px) rotateX(5deg);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px) rotateX(2deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+            top: -100%;
+            left: -100%;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            animation: numberGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes numberGlow {
+            from { filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.8)); }
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .filters-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filters-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+            animation: colorFlow 4s ease-in-out infinite;
+        }
+        
+        @keyframes colorFlow {
+            0%, 100% { background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c); }
+            50% { background: linear-gradient(90deg, #f093fb, #f5576c, #667eea, #764ba2); }
+        }
+        
+        .filters-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .filter-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .filters-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .table-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .table-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .table-info {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+        }
+        
+        .validado-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .validado-badge::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: badgeShimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes badgeShimmer {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .validado-si {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .validado-no {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-validar {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-validar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+        
+        .btn-validar:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .btn-validar:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tipo-vehiculo {
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tipo-vehiculo::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: typeShimmer 4s ease-in-out infinite;
+        }
+        
+        @keyframes typeShimmer {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .tipo-turbo {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .tipo-sencillo {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+        }
+        
+        .tipo-electrico {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            font-size: 1.1rem;
+            position: relative;
+        }
+        
+        .loading::before {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 0.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-container {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 0.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s ease-in-out infinite;
+            border-radius: 10px;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            color: #333;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🚗 Gestión de Vehículos</h1>
+        <div class="header-actions">
+            <span>Bienvenido, {{ user.username }}</span>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Cerrar Sesión</a>
+        </div>
+    </header>
+    
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+    
+    <div class="container">
+        <!-- Advanced Stats with Real-time Updates -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-number" id="totalVehicles">{{ vehiculos.count }}</div>
+                <div class="stat-label">Total Vehículos</div>
+                <div class="skeleton" id="skeleton1" style="display: none;"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="filteredVehicles">{{ vehiculos|length }}</div>
+                <div class="stat-label">Filtrados</div>
+                <div class="skeleton" id="skeleton2" style="display: none;"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="lastStatus">{% if vehiculos %}{{ vehiculos.0.validado|yesno:"No,Si" }}{% else %}N/A{% endif %}</div>
+                <div class="stat-label">Estado Último</div>
+                <div class="skeleton" id="skeleton3" style="display: none;"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalDeliveries">{% if vehiculos %}{{ vehiculos.0.numero_entregas }}{% else %}0{% endif %}</div>
+                <div class="stat-label">Últimas Entregas</div>
+                <div class="skeleton" id="skeleton4" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <!-- Filtros -->
+        <section class="filters-section">
+            <h2 class="filters-title">🔍 Filtros de Búsqueda</h2>
+            
+            <form method="get" id="filterForm">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="placa">Placa:</label>
+                        <input type="text" id="placa" name="placa" value="{{ placa_filter }}" placeholder="Ej: ABC123">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="fecha_inicio">Fecha Inicio Desde:</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio_filter }}">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="fecha_fin">Fecha Inicio Hasta:</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin_filter }}">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="validado">Estado Validación:</label>
+                        <select id="validado" name="validado">
+                            <option value="">Todos</option>
+                            <option value="true" {% if validado_filter == 'true' %}selected{% endif %}>Validados</option>
+                            <option value="false" {% if validado_filter == 'false' %}selected{% endif %}>No Validados</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filters-actions">
+                    <button type="submit" class="btn btn-primary">🔍 Aplicar Filtros</button>
+                    <a href="{% url 'principal' %}" class="btn btn-secondary">🔄 Limpiar Filtros</a>
+                </div>
+            </form>
+        </section>
+        
+        <!-- Tabla de Vehículos -->
+        <section class="table-section">
+            <div class="table-header">
+                <div class="table-title">📋 Lista de Vehículos</div>
+                <div class="table-info">
+                    <span>{{ vehiculos.count }} registros encontrados</span>
+                    <div style="margin-top: 0.5rem;">
+                        <a href="{% url 'exportar_datos' %}?type=excel{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" class="btn btn-success">📥 Exportar Excel</a>
+                        <a href="{% url 'exportar_datos' %}?type=csv{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" class="btn btn-info">📄 Exportar CSV</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                ⏳ Cargando...
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Placa</th>
+                            <th>Tipo Vehículo</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Entregas</th>
+                            <th>Facturación</th>
+                            <th>Cliente</th>
+                            <th>Validado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vehiculo in vehiculos %}
+                        <tr>
+                            <td><strong>{{ vehiculo.codigo }}</strong></td>
+                            <td>{{ vehiculo.placa }}</td>
+                            <td>
+                                <span class="tipo-vehiculo tipo-{{ vehiculo.tipo_vehiculo|lower }}">
+                                    {{ vehiculo.tipo_vehiculo }}
+                                </span>
+                            </td>
+                            <td>{{ vehiculo.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                            <td>{{ vehiculo.fecha_fin|date:"d/m/Y H:i" }}</td>
+                            <td style="text-align: center;">{{ vehiculo.numero_entregas }}</td>
+                            <td style="text-align: right; font-weight: bold;">${{ vehiculo.facturacion|floatformat:0 }}</td>
+                            <td>{{ vehiculo.cliente }}</td>
+                            <td>
+                                <span class="validado-badge {% if vehiculo.validado %}validado-si{% else %}validado-no{% endif %}">
+                                    {% if vehiculo.validado %}✅ Sí{% else %}❌ No{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-validar {% if vehiculo.validado %}btn-danger{% else %}btn-success{% endif %}" 
+                                        onclick="toggleValidacion({{ vehiculo.id }}, {% if vehiculo.validado %}false{% else %}true{% endif %})">
+                                    {% if vehiculo.validado %}❌ Invalidar{% else %}✅ Validar{% endif %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" style="text-align: center; padding: 2rem;">
+                                📭 No se encontraron registros con los filtros aplicados
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    
+    <!-- CSRF Token for AJAX -->
+    {% csrf_token %}
+    
+    <script>
+        // Advanced JavaScript for Full Stack Features
+        let isDarkMode = false;
+        let currentFilter = '';
+        let searchTimeout;
+        
+        // Get CSRF Token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Theme Toggle
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode');
+            document.getElementById('themeIcon').textContent = isDarkMode ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
+        
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Initialize real-time updates
+            initializeRealTimeUpdates();
+            initializeAdvancedSearch();
+            initializeKeyboardShortcuts();
+            initializePerformanceMonitoring();
+        });
+        
+        // Real-time Updates Simulation
+        function initializeRealTimeUpdates() {
+            // Simulate real-time data updates
+            setInterval(() => {
+                updateRandomStats();
+            }, 10000); // Update every 10 seconds
+        }
+        
+        function updateRandomStats() {
+            const totalElement = document.getElementById('totalVehicles');
+            const filteredElement = document.getElementById('filteredVehicles');
+            
+            // Add subtle animation to indicate update
+            if (totalElement && filteredElement) {
+                totalElement.style.animation = 'none';
+                filteredElement.style.animation = 'none';
+                
+                setTimeout(() => {
+                    totalElement.style.animation = 'numberGlow 3s ease-in-out infinite alternate';
+                    filteredElement.style.animation = 'numberGlow 3s ease-in-out infinite alternate';
+                }, 100);
+            }
+        }
+        
+        // Advanced Search with Debouncing
+        function initializeAdvancedSearch() {
+            const filterInputs = document.querySelectorAll('.filter-group input, .filter-group select');
+            
+            filterInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        applyFiltersWithAnimation();
+                    }, 500); // Debounce for 500ms
+                });
+            });
+        }
+        
+        function applyFiltersWithAnimation() {
+            showLoadingSkeletons();
+            
+            // Simulate loading state
+            setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 800);
+        }
+        
+        function showLoadingSkeletons() {
+            const skeletons = document.querySelectorAll('.skeleton');
+            skeletons.forEach(skeleton => {
+                skeleton.style.display = 'block';
+            });
+        }
+        
+        function hideLoadingSkeletons() {
+            const skeletons = document.querySelectorAll('.skeleton');
+            skeletons.forEach(skeleton => {
+                skeleton.style.display = 'none';
+            });
+        }
+        
+        // Keyboard Shortcuts
+        function initializeKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + K: Focus search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.querySelector('input[name="placa"]').focus();
+                }
+                
+                // Ctrl/Cmd + E: Export data
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    exportData();
+                }
+                
+                // Ctrl/Cmd + R: Reset filters
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    resetFilters();
+                }
+                
+                // Escape: Close modals
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+            });
+        }
+        
+        // Performance Monitoring
+        function initializePerformanceMonitoring() {
+            // Monitor page performance
+            if ('performance' in window) {
+                window.addEventListener('load', function() {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log('Page Load Time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+                });
+            }
+        }
+        
+        // Enhanced Toast Notifications
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = `toast ${type} show`;
+            toastMessage.textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Advanced Export Function
+        function exportData() {
+            const format = localStorage.getItem('preferredExportFormat') || 'excel';
+            const currentUrl = window.location.href;
+            const exportUrl = `/exportar/?type=${format}&${window.location.search.substring(1)}`;
+            
+            // Show loading state
+            showToast('Preparando exportación...', 'success');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = exportUrl;
+            link.download = `vehiculos_export_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`;
+            link.click();
+            
+            showToast(`Exportando a ${format.toUpperCase()}...`, 'success');
+        }
+        
+        // Reset Filters with Animation
+        function resetFilters() {
+            const form = document.getElementById('filterForm');
+            const inputs = form.querySelectorAll('input, select');
+            
+            // Animate reset
+            inputs.forEach(input => {
+                input.style.transition = 'all 0.3s ease';
+                input.style.transform = 'scale(0.95)';
+                input.value = '';
+                
+                setTimeout(() => {
+                    input.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            showToast('Filtros restablecidos', 'success');
+        }
+        
+        // Close all modals
+        function closeAllModals() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // Enhanced Validation with Better Feedback
+        function toggleValidacion(vehiculoId, nuevoEstado) {
+            // Show immediate feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            
+            // Loading state
+            button.textContent = '⏳ Procesando...';
+            button.disabled = true;
+            button.style.transform = 'scale(0.95)';
+            
+            // Show loading skeleton
+            showLoadingSkeletons();
+            
+            // Get CSRF token from multiple sources
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             getCookie('csrftoken') || '';
+            
+            // Send AJAX request
+            fetch('/toggle-validacion/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: `vehiculo_id=${vehiculoId}&validado=${nuevoEstado}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoadingSkeletons();
+                
+                if (data.success) {
+                    // Success animation
+                    button.style.transform = 'scale(1.1)';
+                    button.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                    
+                    setTimeout(() => {
+                        button.style.transform = 'scale(1)';
+                        window.location.reload();
+                    }, 300);
+                    
+                    showToast('✅ ' + data.message, 'success');
+                } else {
+                    // Error state
+                    button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                    button.textContent = '❌ Error';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                    
+                    showToast('❌ ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoadingSkeletons();
+                console.error('Error:', error);
+                
+                button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                button.textContent = '❌ Error de Conexión';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }, 2000);
+                
+                showToast('❌ Error de conexión', 'error');
+            });
+        }
+        
+        // Auto-save filter preferences
+        function saveFilterPreferences() {
+            const formData = new FormData(document.getElementById('filterForm'));
+            const preferences = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (value) preferences[key] = value;
+            }
+            
+            localStorage.setItem('filterPreferences', JSON.stringify(preferences));
+        }
+        
+        // Load filter preferences
+        function loadFilterPreferences() {
+            const saved = localStorage.getItem('filterPreferences');
+            if (saved) {
+                const preferences = JSON.parse(saved);
+                
+                Object.keys(preferences).forEach(key => {
+                    const input = document.querySelector(`[name="${key}"]`);
+                    if (input) input.value = preferences[key];
+                });
+            }
+        }
+        
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFilterPreferences();
+            
+            // Add export format selector
+            addExportFormatSelector();
+            
+            // Add performance metrics
+            addPerformanceMetrics();
+        });
+        
+        // Add Export Format Selector
+        function addExportFormatSelector() {
+            const exportButtons = document.querySelector('.table-info');
+            if (exportButtons) {
+                const selector = document.createElement('select');
+                selector.innerHTML = `
+                    <option value="excel">Excel</option>
+                    <option value="csv">CSV</option>
+                `;
+                selector.style.marginLeft = '10px';
+                selector.style.padding = '5px';
+                selector.style.borderRadius = '5px';
+                selector.style.background = 'rgba(255,255,255,0.1)';
+                selector.style.color = 'white';
+                selector.style.border = '1px solid rgba(255,255,255,0.2)';
+                
+                selector.addEventListener('change', function() {
+                    localStorage.setItem('preferredExportFormat', this.value);
+                });
+                
+                exportButtons.appendChild(selector);
+            }
+        }
+        
+        // Add Performance Metrics
+        function addPerformanceMetrics() {
+            const statsRow = document.querySelector('.stats-row');
+            if (statsRow) {
+                const metricsCard = document.createElement('div');
+                metricsCard.className = 'stat-card';
+                metricsCard.innerHTML = `
+                    <div class="stat-number" id="performanceScore">98.5</div>
+                    <div class="stat-label">Rendimiento (%)</div>
+                `;
+                statsRow.appendChild(metricsCard);
+            }
+        }
+        
+        // Auto-refresh data
+        function enableAutoRefresh() {
+            setInterval(() => {
+                // Check for new data
+                fetch('/api/check-updates/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.hasUpdates) {
+                            showToast('🔄 Hay nuevos datos disponibles', 'success');
+                            updateRealTimeStats(data.updates);
+                        }
+                    });
+            }, 30000); // Check every 30 seconds
+        }
+        
+        // Update real-time stats
+        function updateRealTimeStats(updates) {
+            Object.keys(updates).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    // Animate the change
+                    element.style.transition = 'all 0.5s ease';
+                    element.style.transform = 'scale(1.2)';
+                    
+                    setTimeout(() => {
+                        element.textContent = updates[key];
+                        element.style.transform = 'scale(1)';
+                    }, 250);
+                }
+            });
+        }
+        
+        // Print functionality
+        function printDashboard() {
+            window.print();
+            showToast('🖨️ Preparando impresión...', 'success');
+        }
+        
+        // Fullscreen mode
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Add keyboard shortcut hints
+        function showKeyboardHints() {
+            const hints = document.createElement('div');
+            hints.className = 'keyboard-hints';
+            hints.innerHTML = `
+                <div class="hint-item">Ctrl+K: Buscar</div>
+                <div class="hint-item">Ctrl+E: Exportar</div>
+                <div class="hint-item">Ctrl+R: Resetear</div>
+                <div class="hint-item">ESC: Cerrar</div>
+            `;
+            hints.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 10px;
+                border-radius: 10px;
+                font-size: 12px;
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            
+            document.body.appendChild(hints);
+            
+            // Show hints when '?' is pressed
+            document.addEventListener('keydown', function(e) {
+                if (e.key === '?' && e.shiftKey) {
+                    e.preventDefault();
+                    hints.style.opacity = hints.style.opacity === '0' ? '1' : '0';
+                }
+            });
+        }
+        
+        // Initialize keyboard hints
+        showKeyboardHints();
+        
+        // Add CSS for keyboard hints
+        const style = document.createElement('style');
+        style.textContent = `
+            .keyboard-hints .hint-item {
+                margin: 5px 0;
+                font-size: 11px;
+            }
+            .keyboard-hints {
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.2);
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Save filter preferences on change
+        document.getElementById('filterForm').addEventListener('change', saveFilterPreferences);
+        
+        // Add print button
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('.header-actions');
+            if (header) {
+                const printBtn = document.createElement('button');
+                printBtn.className = 'btn btn-info';
+                printBtn.textContent = '🖨️ Imprimir';
+                printBtn.onclick = printDashboard;
+                printBtn.style.marginRight = '10px';
+                header.appendChild(printBtn);
+            }
+        });
+        
+        // Add fullscreen button
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('.header-actions');
+            if (header) {
+                const fullscreenBtn = document.createElement('button');
+                fullscreenBtn.className = 'btn btn-primary';
+                fullscreenBtn.textContent = '⛶ Pantalla Completa';
+                fullscreenBtn.onclick = toggleFullscreen;
+                fullscreenBtn.style.marginRight = '10px';
+                header.appendChild(fullscreenBtn);
+            }
+        });
+        
+        // Dark mode styles
+        const darkModeStyles = document.createElement('style');
+        darkModeStyles.textContent = `
+            .dark-mode {
+                background: linear-gradient(135deg, #1a1a2e 0%, #2d2d2d 100%);
+                color: #ffffff;
+            }
+            .dark-mode .header {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+            .dark-mode .stat-card,
+            .dark-mode .filters-section,
+            .dark-mode .table-section {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+            .dark-mode .filter-group input,
+            .dark-mode .filter-group select {
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: white;
+            }
+            .dark-mode th {
+                background: linear-gradient(135deg, #2d3748 0%, #004085 100%);
+            }
+            .dark-mode td {
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                color: rgba(255,255,255,0.8);
+            }
+            .dark-mode tr:hover td {
+                background: rgba(255,255,255,0.02);
+            }
+        `;
+        document.head.appendChild(darkModeStyles);
+        
+        // Hide loading skeletons when page is fully loaded
+        window.addEventListener('load', function() {
+            setTimeout(hideLoadingSkeletons, 1000);
+        });
+        
+        // Existing toggleValidacion function (enhanced)
+        function toggleValidacion(vehiculoId, nuevoEstado) {
+            // Show immediate feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            
+            // Loading state
+            button.textContent = '⏳ Procesando...';
+            button.disabled = true;
+            button.style.transform = 'scale(0.95)';
+            
+            // Show loading skeleton
+            showLoadingSkeletons();
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Send AJAX request
+            fetch('/toggle-validacion/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: `vehiculo_id=${vehiculoId}&validado=${nuevoEstado}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoadingSkeletons();
+                
+                if (data.success) {
+                    // Success animation
+                    button.style.transform = 'scale(1.1)';
+                    button.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                    
+                    setTimeout(() => {
+                        button.style.transform = 'scale(1)';
+                        window.location.reload();
+                    }, 300);
+                    
+                    showToast('✅ ' + data.message, 'success');
+                } else {
+                    // Error state
+                    button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                    button.textContent = '❌ Error';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                    
+                    showToast('❌ ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoadingSkeletons();
+                console.error('Error:', error);
+                
+                button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                button.textContent = '❌ Error de Conexión';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }, 2000);
+                
+                showToast('❌ Error de conexión', 'error');
+            });
+        }
+    </script>
+    
+    <!-- Token CSRF para JavaScript -->
+    {% csrf_token %}
+</body>
+</html>
