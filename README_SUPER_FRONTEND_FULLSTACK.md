@@ -68,7 +68,7 @@ Django 4.2.7
 Pandas
 ```bash
 # Clonar el repositorio
-git clone <repository-url>
+git clone <https://github.com/pac30/django-powerbi-fullstack.git>
 cd gestion_vehiculos
 
 # Instalar dependencias
